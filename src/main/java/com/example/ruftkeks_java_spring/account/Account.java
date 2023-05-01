@@ -73,7 +73,7 @@ public class Account {
     }
 
     @Builder
-    public Account(String nickname, String name) {
+    public Account(String nickname, String password, String name) {
         this.nickname = nickname;
         this.name = name;
         this.role = RoleEnum.FELLOW.position;
