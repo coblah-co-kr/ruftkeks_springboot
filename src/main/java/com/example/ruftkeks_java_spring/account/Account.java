@@ -43,6 +43,10 @@ public class Account {
 
     private String password;
 
+    private String last_ip;
+
+    private String refreshToken;
+
     private boolean active;
 
     @ElementCollection
@@ -72,8 +76,14 @@ public class Account {
         return this;
     }
 
+    public Account updateLoginInfo(String ClientIp, String refreshToken) {
+        this.last_ip = ClientIp;
+        this.refreshToken = refreshToken;
+        return this;
+    }
+
     @Builder
-    public Account(String nickname, String name) {
+    public Account(String nickname, String password, String name) {
         this.nickname = nickname;
         this.name = name;
         this.role = RoleEnum.FELLOW.position;
