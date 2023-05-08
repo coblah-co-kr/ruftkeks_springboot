@@ -1,6 +1,10 @@
 package com.example.ruftkeks_java_spring.account;
 
+import com.example.ruftkeks_java_spring.common.JwtTokenInfo;
+import com.example.ruftkeks_java_spring.common.RenewTokenInfo;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +39,7 @@ public class AccountController {
     @Value("${jwt.token.secret}")
     private String secretKey;
 
-    private long accessTokenExpiredTimeMs = 1000*60*10;
+    private long accessTokenExpiredTimeMs = 1000;// 1000*60*10;
     private long refreshTokenExpiredTimeMs = 1000*60*60;
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
@@ -55,7 +60,7 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/signin", method = RequestMethod.POST)
-    public ResponseEntity signIn(@RequestBody SignIn signin) {
+    public ResponseEntity signIn(@RequestBody SignIn signin, HttpServletRequest request) {
         String nickname = signin.getNickname();
         String password = signin.getPassword();
 
@@ -64,8 +69,14 @@ public class AccountController {
             return new ResponseEntity<>("계정이 존재하지 않거나, 닉네임과 비밀번호가 일치하지 않습니다.",HttpStatus.UNAUTHORIZED);
         }
         else if (account.isActive()) {
+            JwtTokenInfo tokenInfo = accountService.publishAccessToken(nickname, password);
+            account.updateLoginInfo(
+                    accountService.getClientIp(request),
+                    tokenInfo.getRefreshToken()
+            );
+            this.accountRepository.save(account);
             return new ResponseEntity<>(
-                    accountService.publishAccessToken(nickname, password),
+                    tokenInfo,
                     HttpStatus.OK
             );
         }
@@ -74,11 +85,34 @@ public class AccountController {
         }
     }
 
-    @RequestMapping(value = "/me", method = RequestMethod.POST)
-    public ResponseEntity userInfo(@RequestHeader HttpHeaders header) {
-        /*String token = header.getFirst("Authorization");
-        System.out.println(JwtUtil.validateToken(token, secretKey));*/
-        return new ResponseEntity<>("sad",HttpStatus.OK);
+    @RequestMapping(value = "/token/validate", method = RequestMethod.POST)
+    public ResponseEntity validateToken(@RequestHeader HttpHeaders header) {
+        String accessToken = header.getFirst("Authorization");
+        return new ResponseEntity<>(accountService.tokenValidationResult(accessToken), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/token/renew", method = RequestMethod.POST)
+    public ResponseEntity renewToken(
+            @RequestHeader HttpHeaders header, @RequestBody RenewTokenInfo tokenInfo,
+            HttpServletRequest request
+    ) {
+        String accessToken = header.getFirst("Authorization").substring(7);
+        JwtTokenInfo renewToken = accountService.tokenRenewResult(accessToken, tokenInfo.getRefreshToken(), request);
+        if (renewToken.getAccessToken() != accessToken) {
+            return new ResponseEntity<>(renewToken, HttpStatus.CREATED);
+        }
+        else {
+            return new ResponseEntity<>(renewToken, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(value = "/me", method = RequestMethod.POST)
+    public ResponseEntity userInfo(@RequestHeader HttpHeaders header) {
+        String token = header.getFirst("Authorization");
+        Optional<Account> account = accountService.getMyInfo(token);
+        if (account.isPresent()) {
+            return new ResponseEntity<>(account, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
 }

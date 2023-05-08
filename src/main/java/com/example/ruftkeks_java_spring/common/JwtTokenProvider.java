@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
     private final Key key;
-    private static final int accessTokenExpiredTime = 3600000;
-    private static final int refreshTokenExpiredTime = 86400000;
+    private static final int accessTokenExpiredTime = 60000;//3600000;
+    private static final int refreshTokenExpiredTime = 600000;//86400000;
 
     public JwtTokenProvider(@Value("${jwt.token.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -73,17 +73,37 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
+            return TokenEnum.OK.caseBool;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            System.out.println("잘못된 JWT 서명");
+            return TokenEnum.WRONG.caseBool;
         } catch (ExpiredJwtException e) {
-            System.out.println("만료된 JWT 토큰");
+            return TokenEnum.EXPIRED.caseBool;
         } catch (UnsupportedJwtException e) {
-            System.out.println("지원되지않는 JWT");
+            return TokenEnum.NOT_SUPPORT.caseBool;
         } catch (IllegalArgumentException e) {
-            System.out.println("JWT 토큰이 잘못됨");
+            return TokenEnum.ILLEGAL.caseBool;
         }
-        return false;
+    }
+    public String validateTokenDetail(String token) {
+        try {
+            Jws jws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            String expString = Arrays.stream(jws.getBody().toString().substring(1, jws.getBody().toString().length()-1).split(", ")).filter(s -> s.startsWith("exp=")).findFirst().orElse(null);
+            if (expString != null) {
+                long expiredTime = Long.parseLong(expString.split("=")[1]);
+                long currentTime = System.currentTimeMillis() / 1000;
+                long remainMins = (expiredTime - currentTime);
+                return TokenEnum.OK.text.concat(Long.toString(remainMins));
+            }
+            return TokenEnum.OK.text;
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            return TokenEnum.WRONG.text;
+        } catch (ExpiredJwtException e) {
+            return TokenEnum.EXPIRED.text;
+        } catch (UnsupportedJwtException e) {
+            return TokenEnum.NOT_SUPPORT.text;
+        } catch (IllegalArgumentException e) {
+            return TokenEnum.ILLEGAL.text;
+        }
     }
     private Claims parseClaims(String accessToken) {
         try {

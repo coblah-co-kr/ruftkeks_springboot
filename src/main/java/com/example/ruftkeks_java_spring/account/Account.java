@@ -43,6 +43,10 @@ public class Account {
 
     private String password;
 
+    private String last_ip;
+
+    private String refreshToken;
+
     private boolean active;
 
     @ElementCollection
@@ -69,6 +73,12 @@ public class Account {
 
     public Account changePassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    public Account updateLoginInfo(String ClientIp, String refreshToken) {
+        this.last_ip = ClientIp;
+        this.refreshToken = refreshToken;
         return this;
     }
 
