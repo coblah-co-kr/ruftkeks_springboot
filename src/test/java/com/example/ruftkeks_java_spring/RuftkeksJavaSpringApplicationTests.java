@@ -47,7 +47,7 @@ class RuftkeksJavaSpringApplicationTests {
 	@Test
 	void testJpaUpdate() {
 		Account account = this.accountRepository.findByNickname("Grant");
-		account.update("grant@coblah.co.kr", "https://github.com/modec28", null, "경기도 하남시 미사강변중앙로31번길 15", "010-4141-3783");
+		account.update("grant@coblah.co.kr", "경기도 하남시 미사강변중앙로31번길 15", "010-4141-3783");
 		this.accountRepository.save(account);
 	}
 

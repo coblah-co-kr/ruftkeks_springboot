@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -35,12 +36,6 @@ public class AccountController {
     private EducationRepository educationRepository;
 
     private final AccountService accountService;
-
-    @Value("${jwt.token.secret}")
-    private String secretKey;
-
-    private long accessTokenExpiredTimeMs = 1000;// 1000*60*10;
-    private long refreshTokenExpiredTimeMs = 1000*60*60;
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public ResponseEntity signUp(@RequestBody SignUp signup) {
@@ -85,7 +80,7 @@ public class AccountController {
         }
     }
 
-    @RequestMapping(value = "/token/validate", method = RequestMethod.POST)
+    @RequestMapping(value = "/token/validate", method = RequestMethod.GET)
     public ResponseEntity validateToken(@RequestHeader HttpHeaders header) {
         String accessToken = header.getFirst("Authorization");
         return new ResponseEntity<>(accountService.tokenValidationResult(accessToken), HttpStatus.OK);
@@ -106,7 +101,7 @@ public class AccountController {
         }
     }
 
-    @RequestMapping(value = "/me", method = RequestMethod.POST)
+    @RequestMapping(value = "/me", method = RequestMethod.GET)
     public ResponseEntity userInfo(@RequestHeader HttpHeaders header) {
         String token = header.getFirst("Authorization");
         Optional<Account> account = accountService.getMyInfo(token);
@@ -114,5 +109,11 @@ public class AccountController {
             return new ResponseEntity<>(account, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @RequestMapping(value = "/users", method = RequestMethod.GET)
+    public ResponseEntity allUserInfo(@RequestHeader HttpHeaders header) {
+        String token = header.getFirst("Authorization");
+        return new ResponseEntity<>(accountService.getAllInfo(token), HttpStatus.OK);
     }
 }

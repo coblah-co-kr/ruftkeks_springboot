@@ -87,7 +87,7 @@ public class AccountService {
                     .refreshToken(refreshToken)
                     .build();
         }
-        if (!account.get().getLast_ip().equals(getClientIp(request))) {
+        if (!account.get().getLastIp().equals(getClientIp(request))) {
             return JwtTokenInfo.builder()
                     .grantType("Bearer")
                     .accessToken(accessToken)
@@ -151,5 +151,10 @@ public class AccountService {
     public Optional<Account> getMyInfo(String accessToken) {
         Authentication authentication = jwtTokenProvider.getAuthentication(accessToken.substring(7));
         return this.accountRepository.findByNickname(authentication.getName());
+    }
+
+    public List<AccountProjection> getAllInfo(String accessToken) {
+        Authentication authentication = jwtTokenProvider.getAuthentication(accessToken.substring(7));
+        return this.accountRepository.findAllBy();
     }
 }

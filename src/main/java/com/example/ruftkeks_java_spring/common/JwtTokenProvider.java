@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
     private final Key key;
-    private static final int accessTokenExpiredTime = 60000;//3600000;
-    private static final int refreshTokenExpiredTime = 600000;//86400000;
+    private static final int accessTokenExpiredTime = 3600000;//60000;//3600000;
+    private static final int refreshTokenExpiredTime = 86400000;//600000;//86400000;
 
     public JwtTokenProvider(@Value("${jwt.token.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);

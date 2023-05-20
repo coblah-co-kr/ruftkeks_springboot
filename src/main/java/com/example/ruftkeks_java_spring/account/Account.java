@@ -1,6 +1,7 @@
 package com.example.ruftkeks_java_spring.account;
 
 import com.example.ruftkeks_java_spring.common.RoleEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,21 +30,26 @@ public class Account {
     @Column(length = 20)
     private String email;
 
-    @Column(length = 50)
-    private String link;
+    private Float longitude;
+    private Float latitude;
+
+    @ElementCollection
+    private List<String> links;
 
     @Column(length = 15)
     private String phone;
 
-    private String picture;
+    private String profileImg;
+    private String overviewImg;
     private String address;
 
     @Column(length = 10)
     private String role;
 
+    @JsonIgnore
     private String password;
 
-    private String last_ip;
+    private String lastIp;
 
     private String refreshToken;
 
@@ -58,16 +64,16 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.REMOVE)
     private List<Education> educations = new ArrayList<>();
 
-    public Account update(
-            String email, String link,
-            String picture, String address,
-            String phone
+    public Account updateBase(
+            String email, String address, String phone, List<String> links,
+            Float longitude, Float latitude
     ) {
         this.email = email;
-        this.link = link;
-        this.picture = picture;
         this.address = address;
         this.phone = phone;
+        this.links = links;
+        this.longitude = longitude;
+        this.latitude = latitude;
         return this;
     }
 
@@ -77,7 +83,7 @@ public class Account {
     }
 
     public Account updateLoginInfo(String ClientIp, String refreshToken) {
-        this.last_ip = ClientIp;
+        this.lastIp = ClientIp;
         this.refreshToken = refreshToken;
         return this;
     }
