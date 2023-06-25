@@ -6,10 +6,11 @@ public enum RoleEnum {
     MANAGER(2,"Manager"),
     EXECUTIVE(3, "Executive"),
     ADVISOR(4,"Advisor"),
-    CIO(5, "Chief Information Officer"),
-    COO(5,"Chief Operating Officer"),
-    CFO(5,"Chief Financial Officer"),
-    CEO(6,"Chief Technology Officer");
+    CIO(5, "CIO"),
+    COO(5,"COO"),
+    CFO(5,"CFO"),
+    CTO(5,"CTO"),
+    CEO(6, "CEO");
 
     public int level;
     public String position;

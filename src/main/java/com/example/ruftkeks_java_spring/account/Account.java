@@ -43,7 +43,7 @@ public class Account {
     private String overviewImg;
     private String address;
 
-    @Column(length = 10)
+    @Column(length = 30)
     private String role;
 
     @JsonIgnore
