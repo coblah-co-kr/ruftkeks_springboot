@@ -77,6 +77,16 @@ public class Account {
         return this;
     }
 
+    public Account updateProfileImg(String fileName) {
+        this.profileImg = fileName;
+        return this;
+    }
+
+    public Account updateOverviewImg(String fileName) {
+        this.overviewImg = fileName;
+        return this;
+    }
+
     public Account changePassword(String password) {
         this.password = password;
         return this;

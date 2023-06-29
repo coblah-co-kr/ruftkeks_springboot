@@ -47,7 +47,6 @@ public class PictureController {
             List<String> pictureList = new ArrayList<>();
             for (MultipartFile file: files) {
                 String fileName = file.getOriginalFilename();
-                String fileUrl = "https://" + bucket + "/test" + fileName;
                 pictureList.add(fileName);
                 ObjectMetadata metadata = new ObjectMetadata();
                 metadata.setContentType(file.getContentType());
