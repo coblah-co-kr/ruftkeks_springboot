@@ -40,6 +40,31 @@ public class AccountService {
         return account;
     }
 
+    public String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
+    public Account updatePassword(
+            String nickname,
+            String presentPassword,
+            String wantedPassword
+    ) {
+        Optional<Account> account = this.accountRepository.findByNickname(nickname);
+
+        if (!account.isPresent()) {
+            return null;
+        }
+        if (passwordEncoder.matches(presentPassword, account.get().getPassword())) {
+            Account account1 = account.get();
+            account1.changePassword(passwordEncoder.encode(wantedPassword));
+            this.accountRepository.save(account1);
+            return account1;
+        }
+        else {
+            return null;
+        }
+    }
+
     public Account login(String nickname, String password) {
         Optional<Account> account = this.accountRepository.findByNickname(nickname);
 

@@ -8,6 +8,8 @@ public interface AccountProjection {
     String getEmail();
     Float getLongitude();
     Float getLatitude();
+    Float getLastLatitude();
+    Float getLastLongitude();
     List<String> getLinks();
     String getPhone();
     String getProfileImg();

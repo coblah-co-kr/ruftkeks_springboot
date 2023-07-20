@@ -111,6 +111,51 @@ public class AccountController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    @RequestMapping(value = "/make/temp_pw", method = RequestMethod.PUT)
+    public ResponseEntity makePw(@RequestHeader HttpHeaders header,
+                                   @RequestBody String password) {
+        String token = header.getFirst("Authorization");
+        Optional<Account> account = accountService.getMyInfo(token);
+        if (!account.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity(accountService.encodePassword(password), HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/change_pw", method = RequestMethod.PUT)
+    public ResponseEntity changePw(@RequestHeader HttpHeaders header,
+                                   @RequestBody ChangePw changePw) {
+        String password = changePw.getPassword();
+        String newPassword = changePw.getNewPassword();
+        String token = header.getFirst("Authorization");
+        Optional<Account> account = accountService.getMyInfo(token);
+        if (!account.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        String nickname = account.get().getNickname();
+        Account account1 = accountService.updatePassword(nickname, password, newPassword);
+        if (account1==null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(account1, HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/update/gps", method = RequestMethod.PUT)
+    public ResponseEntity updateGps(@RequestHeader HttpHeaders header,
+                                    @RequestBody GpsLocation gpsLocation) {
+        Float lastLatitude = gpsLocation.getLastLatitude();
+        Float lastLongitude = gpsLocation.getLastLongitude();
+        String token = header.getFirst("Authorization");
+        Optional<Account> account = accountService.getMyInfo(token);
+        if (account.isPresent()) {
+            Account account1 = account.get();
+            account1.updateLastGPS(lastLatitude, lastLongitude);
+            this.accountRepository.save(account1);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public ResponseEntity allUserInfo(@RequestHeader HttpHeaders header) {
         String token = header.getFirst("Authorization");

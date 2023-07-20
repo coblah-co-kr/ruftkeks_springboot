@@ -33,6 +33,9 @@ public class Account {
     private Float longitude;
     private Float latitude;
 
+    private Float lastLongitude;
+    private Float lastLatitude;
+
     @ElementCollection
     private List<String> links;
 
@@ -95,6 +98,12 @@ public class Account {
     public Account updateLoginInfo(String ClientIp, String refreshToken) {
         this.lastIp = ClientIp;
         this.refreshToken = refreshToken;
+        return this;
+    }
+
+    public Account updateLastGPS(Float lastLatitude, Float lastLongitude) {
+        this.lastLatitude = lastLatitude;
+        this.lastLongitude = lastLongitude;
         return this;
     }
 
